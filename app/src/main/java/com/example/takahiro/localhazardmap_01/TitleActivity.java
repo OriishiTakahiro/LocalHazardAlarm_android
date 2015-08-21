@@ -1,16 +1,26 @@
 package com.example.takahiro.localhazardmap_01;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
-public class Title_Activity extends AppCompatActivity {
+public class TitleActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    public void onClick(View viwe) {
+        startActivity(new Intent(TitleActivity.this, BaseActivity.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_title_);
+        Button start_btn = (Button)findViewById(R.id.start_btn);
+        start_btn.setOnClickListener(this);
     }
 
     @Override
@@ -34,4 +44,5 @@ public class Title_Activity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ITEM_LIST">
+        <item>ハザードマップ</item>
+        <item>報告</item>
+        <item>設定</item>
+    </string-array>
+</resources>
