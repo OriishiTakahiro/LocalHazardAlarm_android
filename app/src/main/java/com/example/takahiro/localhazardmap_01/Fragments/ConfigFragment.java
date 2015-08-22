@@ -1,4 +1,4 @@
-package com.example.takahiro.localhazardmap_01.Fragments;
+package com.example.takahiro.localhazardmap_01.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;

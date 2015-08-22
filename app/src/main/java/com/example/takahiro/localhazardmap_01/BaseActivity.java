@@ -13,7 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 // fragment classes
-import com.example.takahiro.localhazardmap_01.Fragments.*;
+import com.example.takahiro.localhazardmap_01.fragments.*;
 
 public class BaseActivity extends AppCompatActivity {
 
