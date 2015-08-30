@@ -1,10 +1,12 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="Fragments.ConfigFragment">
+    tools:context="Fragments.ConfigFragment"
+    android:id="@+id/t">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
+    <Switch
+        android:id="@+id/switch_gps_activator"
+        android:text="GPSによる位置情報の送信と通知の受信"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
 </FrameLayout>

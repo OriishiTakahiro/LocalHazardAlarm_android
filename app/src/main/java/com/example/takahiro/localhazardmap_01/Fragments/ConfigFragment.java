@@ -1,111 +1,63 @@
 package com.example.takahiro.localhazardmap_01.fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.net.Uri;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.Toast;
 
 import com.example.takahiro.localhazardmap_01.R;
+import com.example.takahiro.localhazardmap_01.utility.GpsManager;
+
+import java.util.HashMap;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ConfigFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ConfigFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class ConfigFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class ConfigFragment extends Fragment implements CompoundButton.OnCheckedChangeListener {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static String[] config_items = {"ENABLE_GPS"};
 
-    private OnFragmentInteractionListener mListener;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ConfigFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ConfigFragment newInstance(String param1, String param2) {
-        ConfigFragment fragment = new ConfigFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public ConfigFragment() {
-        // Required empty public constructor
-    }
+    private Switch gps_activator;
+    private SharedPreferences.Editor pref_editor;
+    private SharedPreferences pref_entity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_config, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_config, container, false);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+        this.pref_entity = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        this.pref_editor = this.pref_entity.edit();
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+        //Set ToggleSwitch that setting to activate gps.
+        gps_activator = (Switch)view.findViewById(R.id.switch_gps_activator);
+        gps_activator.setOnCheckedChangeListener(this);
+        gps_activator.setSwitchTypeface(Typeface.DEFAULT_BOLD, Typeface.ITALIC);
+        return view;
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(isChecked){
+            getActivity().startService(new Intent(getActivity(), GpsManager.class));
+            Toast.makeText(getActivity(), "GPS start", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            getActivity().stopService(new Intent(getActivity(), GpsManager.class));
+            HashMap<String, Double> location = GpsManager.getLocation();
+            Toast.makeText(getActivity(),location.get("latitude") +  "\n" + location.get("longitude"), Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

@@ -3,7 +3,7 @@ package com.example.takahiro.localhazardmap_01;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +15,7 @@ import android.widget.ListView;
 // fragment classes
 import com.example.takahiro.localhazardmap_01.fragments.*;
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends FragmentActivity {
 
     public enum PageTag{HMAP(0), CONFIG(1), ALART(2);
         private final int id;
@@ -29,6 +29,7 @@ public class BaseActivity extends AppCompatActivity {
 
     private String[] item_titles;
     private ListView item_list;
+    private PageTag current_page;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,18 +83,23 @@ public class BaseActivity extends AppCompatActivity {
         this.frag_transaction.replace(R.id.content_frame, this.current_fragment);
         this.frag_transaction.addToBackStack(null);
         this.frag_transaction.commit();
+        this.current_page = tag;
     }
 
     class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            switch(position) {
-                case 0:
-                    swapFragment(PageTag.HMAP);
-                    break;
-                case 1:
-                    swapFragment(PageTag.CONFIG);
-                    break;
+            if(current_page.getId() != position) {
+                switch (position) {
+                    case 0:
+                        swapFragment(PageTag.HMAP);
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        swapFragment(PageTag.CONFIG);
+                        break;
+                }
             }
         }
     }

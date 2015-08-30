@@ -27,6 +27,9 @@
             android:name=".BaseActivity"
             android:label="@string/title_activity_base" >
         </activity>
+
+        <service android:name=".utility.GpsManager"/>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
