@@ -14,6 +14,7 @@ import android.widget.ListView;
 
 // fragment classes
 import com.example.takahiro.localhazardmap_01.fragments.*;
+import com.example.takahiro.localhazardmap_01.utility.DBAccesor;
 
 public class BaseActivity extends FragmentActivity {
 
@@ -41,6 +42,8 @@ public class BaseActivity extends FragmentActivity {
         this.item_list = (ListView)findViewById(R.id.left_drawer);
         this.item_list.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item, item_titles));
         this.item_list.setOnItemClickListener(new DrawerItemClickListener());
+
+        DBAccesor.getInstance(getApplicationContext()).updateOrganizations();
 
         swapFragment(PageTag.HMAP);
     }
