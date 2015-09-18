@@ -7,7 +7,7 @@ public class Constants {
 
     // URL
     public static String SCHEME = "http";
-    public static String AUTHORITY = "192.168.0.5";
+    public static String AUTHORITY = "192.168.0.6";
 
     // user data
     public static int ID = 1;

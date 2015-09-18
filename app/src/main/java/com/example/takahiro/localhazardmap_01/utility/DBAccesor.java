@@ -109,7 +109,6 @@ public class DBAccesor extends SQLiteOpenHelper {
             for(ArrayList<String> raw : getRaws(0,null,null,null,null)){
                 existing_raws.add(raw.get(0));
             }
-            Log.d("test",existing_raws.toString());
             try {
                 JSONObject organizations = new JSONObject(response).getJSONObject("response");
                 Iterator<String> keys = organizations.keys();
@@ -118,10 +117,8 @@ public class DBAccesor extends SQLiteOpenHelper {
                     boolean is_existed = false;
                     for(int i=0;i < existing_raws.size() && !is_existed;i++) {
                         is_existed = existing_raws.get(i).equals(key);
-                        Log.d("test",is_existed +"");
                     }
                     if(!is_existed) {
-                        Log.d("test",is_existed +"");
                         insertRaw(0, new String[]{key,organizations.getString(key),"0"});
                     }
                 }
