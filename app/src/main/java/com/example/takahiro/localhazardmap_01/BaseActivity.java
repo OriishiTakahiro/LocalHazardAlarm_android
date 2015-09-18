@@ -18,7 +18,7 @@ import com.example.takahiro.localhazardmap_01.utility.DBAccesor;
 
 public class BaseActivity extends FragmentActivity {
 
-    public enum PageTag{HMAP(0), CONFIG(1), ALART(2);
+    public enum PageTag{HMAP(0),  CONTRIBUTION(1), CONFIG(2),;
         private final int id;
         private PageTag(final int id) {this.id =id;}
         public int getId() {return this.id;}
@@ -79,6 +79,9 @@ public class BaseActivity extends FragmentActivity {
             case HMAP:
                 this.current_fragment = new HMapFragment();
                 break;
+            case CONTRIBUTION:
+                this.current_fragment = new ContributionFragment();
+                break;
             case CONFIG:
                 this.current_fragment = new ConfigFragment();
                 break;
@@ -98,6 +101,7 @@ public class BaseActivity extends FragmentActivity {
                         swapFragment(PageTag.HMAP);
                         break;
                     case 1:
+                        swapFragment(PageTag.CONTRIBUTION);
                         break;
                     case 2:
                         swapFragment(PageTag.CONFIG);

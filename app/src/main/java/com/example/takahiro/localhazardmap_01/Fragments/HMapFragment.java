@@ -27,8 +27,9 @@ import java.util.Arrays;
 
 public class HMapFragment extends MapFragment {
 
-    private static GoogleMap g_map;
-    private CameraPosition center_pos = null;
+    private GoogleMap g_map;
+    private boolean uninitialized = true;
+    private String enabled_org_list = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,22 +53,25 @@ public class HMapFragment extends MapFragment {
             g_map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng point) {
-                    new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(point.latitude), String.valueOf(point.longitude)});
+                    if (uninitialized) {
+                        new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(point.latitude), String.valueOf(point.longitude), enabled_org_list});
+                        uninitialized = false;
+                    }
                 }
             });
-            center_pos = g_map.getCameraPosition();
         }
 
         DBAccesor db_accesor = DBAccesor.getInstance(null);
-        String params = "[";
+        enabled_org_list = "[";
         for(ArrayList<String> raw : db_accesor.getRaws(0,null,"enable=1",null,null)) {
             if(raw.size() == 0) {
-                params+=",";
+                enabled_org_list += "]";
                 break;
             }
-            params += raw.get(0)+",";
+            enabled_org_list += raw.get(0)+",";
         }
-        new GetMap().execute(new String[]{params.replaceAll(",$","]")});
+        enabled_org_list = enabled_org_list.replaceAll(",$","]");
+        new GetMap().execute(new String[]{enabled_org_list.replaceAll(",$","]")});
     }
 
     private class GetMap extends GetHttp {
@@ -104,7 +108,7 @@ public class HMapFragment extends MapFragment {
     }
     private class PostLocation extends PostHttp {
         private PostLocation() {
-            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude")));
+            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","layers")));
         }
         @Override
         public void onPostExecute(String response) {

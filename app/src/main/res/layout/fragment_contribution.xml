@@ -1,0 +1,42 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.takahiro.localhazardmap_01.fragments.ContributionFragment">
+
+    <TextView
+        android:text="投稿タイトル"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        />
+    <EditText
+        android:id="@+id/title_editer"
+        android:hint="title"
+        android:singleLine="true"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        />
+
+     <TextView
+        android:text="投稿詳細"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        />
+    <EditText
+        android:id="@+id/description_editer"
+        android:hint="description"
+        android:maxLines="8"
+        android:minLines="8"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        />
+
+    <Button
+        android:id="@+id/send_btn"
+        android:text="送信"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        />
+</LinearLayout>
