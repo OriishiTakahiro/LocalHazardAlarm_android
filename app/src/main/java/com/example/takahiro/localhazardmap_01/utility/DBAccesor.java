@@ -105,6 +105,7 @@ public class DBAccesor extends SQLiteOpenHelper {
         }
         @Override
         protected void onPostExecute(String response) {
+            Log.d("test",response);
             ArrayList<String> existing_raws = new ArrayList<String>();
             for(ArrayList<String> raw : getRaws(0,null,null,null,null)){
                 existing_raws.add(raw.get(0));

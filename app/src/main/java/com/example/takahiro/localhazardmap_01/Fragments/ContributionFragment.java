@@ -41,6 +41,7 @@ public class ContributionFragment extends Fragment {
             public void onClick(View view) {
                 HashMap<String, Double> user_location = GpsManager.getLocation();
                 if(user_location != null) {
+                    Log.d("test","mk:push btn");
                     new PostContribution().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), title_editer.getText().toString(), description_editer.getText().toString()});
                 } else {
                     Toast.makeText(getActivity(), "投稿機能を利用するにはGPS設定をONにしてください", Toast.LENGTH_LONG).show();
@@ -58,6 +59,7 @@ public class ContributionFragment extends Fragment {
         }
         @Override
         protected void onPostExecute(String response) {
+            Log.d("test",response);
             Toast.makeText(getActivity(), response, Toast.LENGTH_LONG);
         }
     }

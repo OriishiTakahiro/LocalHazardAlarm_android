@@ -15,6 +15,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolygonOptions;
 
@@ -46,17 +47,17 @@ public class HMapFragment extends MapFragment {
             g_map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
                 @Override
                 public void onMyLocationChange(Location curr_location) {
-                    LatLng curr_latlng = new LatLng(curr_location.getLatitude(), curr_location.getLongitude());
-                    g_map.moveCamera(CameraUpdateFactory.newLatLngZoom(curr_latlng, 15));
+                    if (uninitialized) {
+                        LatLng curr_latlng = new LatLng(curr_location.getLatitude(), curr_location.getLongitude());
+                        g_map.moveCamera(CameraUpdateFactory.newLatLngZoom(curr_latlng, 15));
+                        uninitialized = false;
+                    }
                 }
             });
             g_map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng point) {
-                    if (uninitialized) {
-                        new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(point.latitude), String.valueOf(point.longitude), enabled_org_list});
-                        uninitialized = false;
-                    }
+                    new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(point.latitude), String.valueOf(point.longitude), enabled_org_list});
                 }
             });
         }
@@ -80,13 +81,16 @@ public class HMapFragment extends MapFragment {
         }
         @Override
         protected void onPostExecute(String response) {
+            Log.d("test",response);
             ArrayList<ArrayList<LatLng>> polygons = new ArrayList<ArrayList<LatLng>>();
             try {
                 JSONArray warnings = new JSONObject(response).getJSONArray("response");
                 for(int i=0;i < warnings.length();i++) {
+                    Log.d("test", "warnings " + warnings);
                     ArrayList<LatLng> apexes = new ArrayList<LatLng>();
                     JSONArray columns = warnings.getJSONArray(i);
                     for(int j=0;j < columns.getJSONArray(1).length();j++) {
+                        Log.d("test", "columns " + columns);
                         String latitude = columns.getJSONArray(1).getJSONObject(j).keys().next();
                         apexes.add(new LatLng(Double.parseDouble(latitude), columns.getJSONArray(1).getJSONObject(j).getDouble(latitude)));
                     }
@@ -97,18 +101,28 @@ public class HMapFragment extends MapFragment {
                 Log.d("error", e.toString());
             }
             for(int i=0;i < polygons.size();i++) {
-                PolygonOptions polygon_op = new PolygonOptions();
-                for(LatLng apexe : polygons.get(i)) polygon_op.add(apexe);
-                polygon_op.strokeColor(Color.BLACK);
-                polygon_op.strokeWidth(1);
-                polygon_op.fillColor(Color.argb(60,255,210,210));
-                g_map.addPolygon(polygon_op);
+                if(polygons.get(i).size() == 1) {
+                    g_map.addCircle(new CircleOptions()
+                            .center(polygons.get(i).get(0))
+                            .radius(300)
+                            .fillColor(Color.argb(50, 200, 200, 255))
+                            .strokeColor(Color.BLACK)
+                            .strokeWidth(1)
+                    );
+                } else {
+                    PolygonOptions polygon_op = new PolygonOptions();
+                    for (LatLng apexe : polygons.get(i)) polygon_op.add(apexe);
+                    polygon_op.strokeColor(Color.BLACK);
+                    polygon_op.strokeWidth(1);
+                    polygon_op.fillColor(Color.argb(50, 255, 210, 210));
+                    g_map.addPolygon(polygon_op);
+                }
             }
         }
     }
     private class PostLocation extends PostHttp {
         private PostLocation() {
-            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","layers")));
+            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","orgs")));
         }
         @Override
         public void onPostExecute(String response) {

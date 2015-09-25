@@ -50,12 +50,23 @@ public class GpsManager extends Service {
 
     @Override
     public void onCreate() {
+        DBAccesor db_accesor = DBAccesor.getInstance(null);
+        String enabled_org_list = "[";
+        for(ArrayList<String> raw : db_accesor.getRaws(0,null,"enable=1",null,null)) {
+            if(raw.size() == 0) {
+                enabled_org_list += "]";
+                break;
+            }
+            enabled_org_list += raw.get(0)+",";
+        }
+        enabled_org_list = enabled_org_list.replaceAll(",$","]");
+        final String tmp = enabled_org_list;
         this.location_listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 user_location.put("latitude", location.getLatitude());
                 user_location.put("longitude", location.getLongitude());
-                new PostLocation().execute(String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")));
+                new PostLocation().execute(String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), tmp);
             }
             @Override
             public void onProviderDisabled(String provider) {}
@@ -99,7 +110,7 @@ public class GpsManager extends Service {
     // WrapperClass for accessor
     private class PostLocation extends PostHttp {
         public PostLocation() {
-            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude")));
+            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","orgs")));
         }
         @Override
         protected void onPostExecute(String response) {
