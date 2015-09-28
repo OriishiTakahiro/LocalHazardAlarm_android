@@ -1,8 +1,8 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical"
     tools:context="com.example.takahiro.localhazardmap_01.fragments.ContributionFragment">
 
@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         />
+
     <EditText
         android:id="@+id/title_editer"
         android:hint="title"
@@ -24,19 +25,41 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         />
+
     <EditText
         android:id="@+id/description_editer"
         android:hint="description"
-        android:maxLines="8"
-        android:minLines="8"
+        android:maxLines="3"
+        android:minLines="3"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         />
 
-    <Button
-        android:id="@+id/send_btn"
-        android:text="送信"
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        >
+        <Button
+            android:id="@+id/shutter_btn"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="撮影"
+            />
+
+        <Button
+            android:id="@+id/send_btn"
+            android:text="送信"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            />
+    </LinearLayout>
+
+    <SurfaceView
+        android:id="@+id/photo_view"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         />
+
 </LinearLayout>
