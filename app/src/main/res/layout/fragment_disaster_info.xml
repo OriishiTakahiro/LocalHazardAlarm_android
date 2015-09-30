@@ -1,0 +1,39 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.takahiro.localhazardmap_01.fragments.DisasterInfoFragment">
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:text="title"
+        />
+
+    <TextView
+        android:id="@+id/disas_info_title"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:text="description"
+        />
+
+    <TextView
+        android:id="@+id/disas_info_description"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        />
+
+    <SurfaceView
+        android:id="@+id/disas_info_photo"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        />
+
+</LinearLayout>

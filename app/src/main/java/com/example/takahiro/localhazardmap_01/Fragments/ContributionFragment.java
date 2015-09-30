@@ -1,5 +1,10 @@
 package com.example.takahiro.localhazardmap_01.fragments;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -18,6 +23,7 @@ import com.example.takahiro.localhazardmap_01.entity.Constants;
 import com.example.takahiro.localhazardmap_01.utility.GpsManager;
 import com.example.takahiro.localhazardmap_01.utility.PostHttp;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,6 +37,7 @@ public class ContributionFragment extends Fragment {
 
     private boolean photo_is_taken = false;
     private byte[] photo;
+    private Bitmap bitmap;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,9 +58,15 @@ public class ContributionFragment extends Fragment {
             public void onClick(View view) {
                 HashMap<String, Double> user_location = GpsManager.getLocation();
                 if(user_location != null) {
-                    Log.d("test","mk:push btn");
-                    new PostContribution().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), title_editer.getText().toString(), description_editer.getText().toString(), photo.toString()});
-                    Log.d("test", photo.toString());
+                    /*
+                    String photo_data = "a";
+                    //Log.d("test", photo.length + "");
+                    for(byte byte_data : photo) {
+                        photo_data += Byte.toString(byte_data);
+                    }
+                    Log.d("test", photo_data);
+                    */
+                    new PostContribution().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), title_editer.getText().toString(), description_editer.getText().toString(), "byte-data"});
                 } else {
                     Toast.makeText(getActivity(), "投稿機能を利用するにはGPS設定をONにしてください", Toast.LENGTH_LONG).show();
                 }
@@ -104,7 +117,7 @@ public class ContributionFragment extends Fragment {
             List<Camera.Size> previewSizes = camera_params.getSupportedPreviewSizes();
             Camera.Size size = previewSizes.get(0);
             camera_params.setPreviewSize(size.width, size.height);
-            camera_params.setPreviewFormat(format);
+            //camera_params.setPreviewFormat(format);
             camera.setParameters(camera_params);
             camera.setDisplayOrientation(90);
             camera.startPreview();
@@ -128,10 +141,26 @@ public class ContributionFragment extends Fragment {
     private Camera.PictureCallback picture_litener = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-        if(data != null) {
-            photo = data;
-            camera.stopPreview();
+            if(data != null) {
+                Camera.Parameters camera_params = camera.getParameters();
+                int width = camera_params.getPreviewSize().width;
+                int height = camera_params.getPreviewSize().height;
+                bitmap = getBitmapImageFromYUV(data, width, height);
+                ByteArrayOutputStream bao_stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bao_stream);
+                photo = bao_stream.toByteArray();
+                camera.stopPreview();
+            }
         }
+        public Bitmap getBitmapImageFromYUV(byte[] data, int width, int height) {
+            YuvImage yuvimage = new YuvImage(data, ImageFormat.NV21, width, height, null);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            yuvimage.compressToJpeg(new Rect(0, 0, width, height), 80, baos);
+            byte[] jdata = baos.toByteArray();
+            BitmapFactory.Options bitmapFatoryOptions = new BitmapFactory.Options();
+            bitmapFatoryOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+            Bitmap bmp = BitmapFactory.decodeByteArray(jdata, 0, jdata.length, bitmapFatoryOptions);
+            return bmp;
         }
     };
 

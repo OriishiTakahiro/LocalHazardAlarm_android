@@ -4,8 +4,10 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.example.takahiro.localhazardmap_01.R;
 import com.example.takahiro.localhazardmap_01.entity.Constants;
 import com.example.takahiro.localhazardmap_01.utility.DBAccesor;
 import com.example.takahiro.localhazardmap_01.utility.GetHttp;
@@ -25,6 +27,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 public class HMapFragment extends MapFragment {
 
@@ -36,7 +39,6 @@ public class HMapFragment extends MapFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-
 
     @Override
     public void onResume() {
@@ -128,15 +130,14 @@ public class HMapFragment extends MapFragment {
         public void onPostExecute(String response) {
             try {
                 JSONArray warnings = new JSONObject(response).getJSONArray("response");
-                ArrayList<String> titles = new ArrayList<String>();
-                ArrayList<String> descriptions = new ArrayList<String>();
-                String message = "";
+                LinkedList<String> titles = new LinkedList<String>();
+                HMapFrameFragment.descriptions = new ArrayList<String>();
                 for(int i = 0;i < warnings.length();i++) {
                     titles.add(warnings.getJSONObject(i).getString("name"));
-                    descriptions.add(warnings.getJSONObject(i).getString("description"));
-                    message += titles.get(i) + " : " + descriptions.get(i)+"\n";
+                    HMapFrameFragment.descriptions.add(warnings.getJSONObject(i).getString("description"));
                 }
-                Toast.makeText(getActivity(),message,Toast.LENGTH_LONG).show();
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, titles.toArray(new String[0]));
+                HMapFrameFragment.disaster_list.setAdapter(adapter);
             } catch(JSONException error) {
                 Log.d("error", error.toString());
             }

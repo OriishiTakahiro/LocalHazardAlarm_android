@@ -40,7 +40,6 @@ public class DBAccesor extends SQLiteOpenHelper {
         return instance;
     }
 
-
     public ArrayList<ArrayList<String>> getRaws(Integer table_id, String[] columns, String where, String[] params, String order_by) {
         ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
         Cursor cursor = db_entity.query(TABLE_LIST[table_id][0],columns,where,params,null,null,order_by);
@@ -107,11 +106,13 @@ public class DBAccesor extends SQLiteOpenHelper {
         protected void onPostExecute(String response) {
             Log.d("test",response);
             ArrayList<String> existing_raws = new ArrayList<String>();
+
             for(ArrayList<String> raw : getRaws(0,null,null,null,null)){
                 existing_raws.add(raw.get(0));
             }
+
             try {
-                JSONObject organizations = new JSONObject(response).getJSONObject("response");
+                JSONObject organizations = new JSONObject(response);
                 Iterator<String> keys = organizations.keys();
                 while(keys.hasNext()) {
                     String key = keys.next();
@@ -125,6 +126,7 @@ public class DBAccesor extends SQLiteOpenHelper {
                 }
             } catch(JSONException error) {
             }
+
         }
     }
 

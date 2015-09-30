@@ -77,7 +77,7 @@ public class BaseActivity extends FragmentActivity {
 
         switch(tag) {
             case HMAP:
-                this.current_fragment = new HMapFragment();
+                this.current_fragment = new HMapFrameFragment();
                 break;
             case CONTRIBUTION:
                 this.current_fragment = new ContributionFragment();
@@ -86,6 +86,7 @@ public class BaseActivity extends FragmentActivity {
                 this.current_fragment = new ConfigFragment();
                 break;
         }
+
         this.frag_transaction.replace(R.id.content_frame, this.current_fragment);
         this.frag_transaction.addToBackStack(null);
         this.frag_transaction.commit();

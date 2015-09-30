@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,11 +22,13 @@ import com.example.takahiro.localhazardmap_01.entity.Constants;
 import com.example.takahiro.localhazardmap_01.utility.DBAccesor;
 import com.example.takahiro.localhazardmap_01.utility.GetHttp;
 import com.example.takahiro.localhazardmap_01.utility.GpsManager;
-import com.google.android.gms.drive.widget.DataBufferAdapter;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class ConfigFragment extends Fragment implements CompoundButton.OnCheckedChangeListener {
@@ -60,11 +61,15 @@ public class ConfigFragment extends Fragment implements CompoundButton.OnChecked
         this.gps_activator.setOnCheckedChangeListener(this);
         this.gps_activator.setSwitchTypeface(Typeface.DEFAULT_BOLD, Typeface.ITALIC);
 
+        // Generate checkbox list.
         this.org_list = new ArrayList<CheckBox>();
         LinearLayout linear_layout = (LinearLayout)view.findViewById(R.id.org_list);
         db_accesor = DBAccesor.getInstance(getActivity().getApplicationContext());
         ArrayList<ArrayList<String>> raws = db_accesor.getRaws(0,null,null,null,null);
+
         Log.d("test", raws.toString());
+
+        // read org_list from database.
         for(ArrayList<String> raw : raws) {
             final int id = Integer.parseInt(raw.get(0));
             final CheckBox tmp = new CheckBox(getActivity().getApplicationContext());
@@ -100,10 +105,21 @@ public class ConfigFragment extends Fragment implements CompoundButton.OnChecked
 
     private class GetOrgList extends GetHttp {
         public GetOrgList(){
-            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("request")));
+            super(Constants.SCHEME, Constants.AUTHORITY, "org/getList", new ArrayList<String>(Arrays.asList("request")));
         }
         @Override
         protected void onPostExecute(String response) {
+            try {
+                HashMap<Integer, String> org_hash  = new HashMap<Integer, String>();
+                JSONObject orgs = new JSONObject(response);
+                Iterator<String> iterator_key = orgs.keys();
+                while(iterator_key.hasNext()) {
+                    String key = iterator_key.next();
+                    org_hash.put(Integer.parseInt(key), orgs.getString(key));
+                }
+                ArrayList<ArrayList<String>> raws = db_accesor.getRaws(0,null,null,null,null);
+            } catch(Exception e) {
+            }
         }
 
     }
