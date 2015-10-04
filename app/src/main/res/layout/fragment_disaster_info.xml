@@ -4,36 +4,87 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#e0ffffff"
+
     tools:context="com.example.takahiro.localhazardmap_01.fragments.DisasterInfoFragment">
 
-    <TextView
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:text="title"
-        />
 
     <TextView
         android:id="@+id/disas_info_title"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
+        android:textSize="32dp"
         />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="#ff808080" />
+
+    <TextView
+        android:id="@+id/disas_info_org"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_marginBottom="4dp"
+        android:textSize="16dp"
+        />
+
+    <TextView
+        android:id="@+id/disas_info_risklevel"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_marginBottom="4dp"
+        android:textSize="16dp"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="#ff808080" />
 
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
-        android:text="description"
+        android:text="詳細情報"
+        android:textSize="16dp"
         />
 
     <TextView
         android:id="@+id/disas_info_description"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
+        android:textSize="16dp"
+        android:maxLines="3"
+        android:minLines="3"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="4dp"
         />
 
-    <SurfaceView
-        android:id="@+id/disas_info_photo"
+
+    <ScrollView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        >
+        <ImageView
+            android:id="@+id/disas_info_img"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            />
+    </ScrollView>
+
+    <Button
+        android:id="@+id/back_to_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:textSize="16dp"
+        android:text="地図画面へ戻る"
         />
 
 </LinearLayout>

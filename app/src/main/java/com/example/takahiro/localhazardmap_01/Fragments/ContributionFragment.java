@@ -24,6 +24,8 @@ import com.example.takahiro.localhazardmap_01.utility.GpsManager;
 import com.example.takahiro.localhazardmap_01.utility.PostHttp;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,18 +59,11 @@ public class ContributionFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 HashMap<String, Double> user_location = GpsManager.getLocation();
-                if(user_location != null) {
-                    /*
-                    String photo_data = "a";
-                    //Log.d("test", photo.length + "");
-                    for(byte byte_data : photo) {
-                        photo_data += Byte.toString(byte_data);
-                    }
-                    Log.d("test", photo_data);
-                    */
-                    new PostContribution().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), title_editer.getText().toString(), description_editer.getText().toString(), "byte-data"});
+                if(user_location != null ) {
+                    String photo_data = photo != null ? new String(photo, Charset.forName("ISO-8859-1")) : "";
+                    new PostContribution().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), title_editer.getText().toString(), description_editer.getText().toString(), photo_data});
                 } else {
-                    Toast.makeText(getActivity(), "投稿機能を利用するにはGPS設定をONにしてください", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "投稿機能を利用するにはGPS設定をONにしてください\n(既にONならばGPSが位置を検出するまでお待ちください)", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -101,6 +96,7 @@ public class ContributionFragment extends Fragment {
 
     // When the SurfaceView is holden on display, this callback is called.
     private SurfaceHolder.Callback holder_callback = new SurfaceHolder.Callback(){
+
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             camera = Camera.open();
@@ -113,12 +109,7 @@ public class ContributionFragment extends Fragment {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             camera.stopPreview();
-            Camera.Parameters camera_params = camera.getParameters();
-            List<Camera.Size> previewSizes = camera_params.getSupportedPreviewSizes();
-            Camera.Size size = previewSizes.get(0);
-            camera_params.setPreviewSize(size.width, size.height);
-            //camera_params.setPreviewFormat(format);
-            camera.setParameters(camera_params);
+            camera.setParameters(getCameraParameters());
             camera.setDisplayOrientation(90);
             camera.startPreview();
         }
@@ -126,6 +117,30 @@ public class ContributionFragment extends Fragment {
         public void surfaceDestroyed(SurfaceHolder holder){
             camera.stopPreview();
             camera.release();
+        }
+
+        private Camera.Parameters getCameraParameters() {
+            Camera.Parameters camera_params = camera.getParameters();
+            List<Camera.Size> previewSizes = camera_params.getSupportedPreviewSizes();
+            Camera.Size size = previewSizes.get(0);
+            camera_params.setPreviewSize(size.width, size.height);
+            setParamPicSize(camera_params, size.width, size.height);
+            camera_params.getSupportedPictureSizes();
+            return camera_params;
+        }
+
+        private void setParamPicSize(Camera.Parameters camera_params, int width, int height) {
+            List<Camera.Size> list_supported_pic_sizes = camera_params.getSupportedPictureSizes();
+            Camera.Size valid_size = list_supported_pic_sizes.get(0);
+            if(list_supported_pic_sizes != null) {
+                for(Camera.Size supported_pic_size : list_supported_pic_sizes) {
+                    if(Constants.MAX_PIC_SIZE >= Math.max(supported_pic_size.width, supported_pic_size.height)) {
+                        valid_size = supported_pic_size;
+                        break;
+                    }
+                }
+            }
+            camera_params.setPictureSize(valid_size.width, valid_size.height);
         }
 
     };
@@ -142,25 +157,9 @@ public class ContributionFragment extends Fragment {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
             if(data != null) {
-                Camera.Parameters camera_params = camera.getParameters();
-                int width = camera_params.getPreviewSize().width;
-                int height = camera_params.getPreviewSize().height;
-                bitmap = getBitmapImageFromYUV(data, width, height);
-                ByteArrayOutputStream bao_stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bao_stream);
-                photo = bao_stream.toByteArray();
+                photo = data;
                 camera.stopPreview();
             }
-        }
-        public Bitmap getBitmapImageFromYUV(byte[] data, int width, int height) {
-            YuvImage yuvimage = new YuvImage(data, ImageFormat.NV21, width, height, null);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            yuvimage.compressToJpeg(new Rect(0, 0, width, height), 80, baos);
-            byte[] jdata = baos.toByteArray();
-            BitmapFactory.Options bitmapFatoryOptions = new BitmapFactory.Options();
-            bitmapFatoryOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-            Bitmap bmp = BitmapFactory.decodeByteArray(jdata, 0, jdata.length, bitmapFatoryOptions);
-            return bmp;
         }
     };
 
@@ -170,7 +169,6 @@ public class ContributionFragment extends Fragment {
         }
         @Override
         protected void onPostExecute(String response) {
-            Log.d("test",response);
             Toast.makeText(getActivity(), response, Toast.LENGTH_LONG);
         }
     }

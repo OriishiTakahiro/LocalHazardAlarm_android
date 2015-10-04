@@ -5,6 +5,5 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_base">BaseActivity</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="PROMPT_FOR_SET_RECEIVE_RISK_LEVEL">通知受信を行う最低危険度</string>
 </resources>

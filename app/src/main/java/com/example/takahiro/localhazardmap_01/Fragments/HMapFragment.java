@@ -1,22 +1,22 @@
 package com.example.takahiro.localhazardmap_01.fragments;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import com.example.takahiro.localhazardmap_01.R;
 import com.example.takahiro.localhazardmap_01.entity.Constants;
-import com.example.takahiro.localhazardmap_01.utility.DBAccesor;
+import com.example.takahiro.localhazardmap_01.entity.WarningInfo;
 import com.example.takahiro.localhazardmap_01.utility.GetHttp;
 
 import com.example.takahiro.localhazardmap_01.utility.PostHttp;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -27,13 +27,14 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
 public class HMapFragment extends MapFragment {
 
     private GoogleMap g_map;
     private boolean uninitialized = true;
-    private String enabled_org_list = "";
+    private String enabled_rank_list = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,7 @@ public class HMapFragment extends MapFragment {
     @Override
     public void onResume() {
         super.onResume();
+
         if(g_map == null) g_map = getMap();
         if(g_map != null) {
             g_map.setMyLocationEnabled(true);
@@ -59,22 +61,20 @@ public class HMapFragment extends MapFragment {
             g_map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng point) {
-                    new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(point.latitude), String.valueOf(point.longitude), enabled_org_list});
+                    new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(point.latitude), String.valueOf(point.longitude), enabled_rank_list, "1"});
                 }
             });
         }
 
-        DBAccesor db_accesor = DBAccesor.getInstance(null);
-        enabled_org_list = "[";
-        for(ArrayList<String> raw : db_accesor.getRaws(0,null,"enable=1",null,null)) {
-            if(raw.size() == 0) {
-                enabled_org_list += "]";
-                break;
-            }
-            enabled_org_list += raw.get(0)+",";
+        SharedPreferences pref_entity = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String[] list = getActivity().getApplicationContext().getResources().getStringArray(R.array.ORG_RANK);
+        ArrayList<String> org_rank_list = new ArrayList<String>(Arrays.asList(list));
+        enabled_rank_list = "[";
+        for(int i=0;i < org_rank_list.size();i++ ) {
+            enabled_rank_list += pref_entity.getBoolean(org_rank_list.get(i),false) ? (org_rank_list.size()-i-1) + "," : "";
         }
-        enabled_org_list = enabled_org_list.replaceAll(",$","]");
-        new GetMap().execute(new String[]{enabled_org_list.replaceAll(",$","]")});
+        enabled_rank_list = enabled_rank_list.replaceAll(",$","]");
+        new GetMap().execute(new String[]{enabled_rank_list.replaceAll(",$", "]")});
     }
 
     private class GetMap extends GetHttp {
@@ -83,16 +83,13 @@ public class HMapFragment extends MapFragment {
         }
         @Override
         protected void onPostExecute(String response) {
-            Log.d("test",response);
             ArrayList<ArrayList<LatLng>> polygons = new ArrayList<ArrayList<LatLng>>();
             try {
                 JSONArray warnings = new JSONObject(response).getJSONArray("response");
                 for(int i=0;i < warnings.length();i++) {
-                    Log.d("test", "warnings " + warnings);
                     ArrayList<LatLng> apexes = new ArrayList<LatLng>();
                     JSONArray columns = warnings.getJSONArray(i);
                     for(int j=0;j < columns.getJSONArray(1).length();j++) {
-                        Log.d("test", "columns " + columns);
                         String latitude = columns.getJSONArray(1).getJSONObject(j).keys().next();
                         apexes.add(new LatLng(Double.parseDouble(latitude), columns.getJSONArray(1).getJSONObject(j).getDouble(latitude)));
                     }
@@ -106,7 +103,7 @@ public class HMapFragment extends MapFragment {
                 if(polygons.get(i).size() == 1) {
                     g_map.addCircle(new CircleOptions()
                             .center(polygons.get(i).get(0))
-                            .radius(300)
+                            .radius(50)
                             .fillColor(Color.argb(50, 200, 200, 255))
                             .strokeColor(Color.BLACK)
                             .strokeWidth(1)
@@ -124,17 +121,29 @@ public class HMapFragment extends MapFragment {
     }
     private class PostLocation extends PostHttp {
         private PostLocation() {
-            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","orgs")));
+            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","rank","risk_level")));
         }
         @Override
         public void onPostExecute(String response) {
             try {
+                Log.d("test",response);
                 JSONArray warnings = new JSONObject(response).getJSONArray("response");
+                HMapFrameFragment.war_info_list = new ArrayList<WarningInfo>();
                 LinkedList<String> titles = new LinkedList<String>();
-                HMapFrameFragment.descriptions = new ArrayList<String>();
                 for(int i = 0;i < warnings.length();i++) {
-                    titles.add(warnings.getJSONObject(i).getString("name"));
-                    HMapFrameFragment.descriptions.add(warnings.getJSONObject(i).getString("description"));
+                    JSONObject warning = warnings.getJSONObject(i);
+                    WarningInfo tmp_warning = new WarningInfo(
+                            warning.getString("name"),
+                            warning.getString("description"),
+                            warning.getString("org"),
+                            warning.getInt("risk_level"),
+                            warning.has("img") ? warning.getString("img") : null
+                        );
+                    HMapFrameFragment.war_info_list.add(tmp_warning);
+                }
+                Collections.sort(HMapFrameFragment.war_info_list, new WarningInfo.WarningComparatorDecOrderByRisk());
+                for(WarningInfo tmp : HMapFrameFragment.war_info_list) {
+                    titles.add(tmp.risk_level + " | " + tmp.title + " (" + tmp.organization + ")");
                 }
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, titles.toArray(new String[0]));
                 HMapFrameFragment.disaster_list.setAdapter(adapter);

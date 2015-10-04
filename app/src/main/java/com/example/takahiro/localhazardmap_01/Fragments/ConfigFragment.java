@@ -11,9 +11,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -38,7 +41,6 @@ public class ConfigFragment extends Fragment implements CompoundButton.OnChecked
     private Switch gps_activator;
     private ArrayList<CheckBox> org_list;
 
-    private DBAccesor db_accesor;
     private SharedPreferences.Editor pref_editor;
     private SharedPreferences pref_entity;
 
@@ -55,73 +57,63 @@ public class ConfigFragment extends Fragment implements CompoundButton.OnChecked
         this.pref_entity = PreferenceManager.getDefaultSharedPreferences(getActivity());
         this.pref_editor = this.pref_entity.edit();
 
-
         //Set ToggleSwitch that setting to activate gps.
-        this.gps_activator = (Switch)view.findViewById(R.id.switch_gps_activator);
+        this.gps_activator = (Switch) view.findViewById(R.id.switch_gps_activator);
         this.gps_activator.setOnCheckedChangeListener(this);
         this.gps_activator.setSwitchTypeface(Typeface.DEFAULT_BOLD, Typeface.ITALIC);
 
         // Generate checkbox list.
         this.org_list = new ArrayList<CheckBox>();
-        LinearLayout linear_layout = (LinearLayout)view.findViewById(R.id.org_list);
-        db_accesor = DBAccesor.getInstance(getActivity().getApplicationContext());
-        ArrayList<ArrayList<String>> raws = db_accesor.getRaws(0,null,null,null,null);
+        LinearLayout linear_layout = (LinearLayout) view.findViewById(R.id.org_list);
 
-        Log.d("test", raws.toString());
+        String[] list = getActivity().getApplicationContext().getResources().getStringArray(R.array.ORG_RANK);
+        ArrayList<String> org_rank_list = new ArrayList<String>(Arrays.asList(list));
 
-        // read org_list from database.
-        for(ArrayList<String> raw : raws) {
-            final int id = Integer.parseInt(raw.get(0));
+        for (String org_rank : org_rank_list) {
             final CheckBox tmp = new CheckBox(getActivity().getApplicationContext());
-            tmp.setText(raw.get(1));
-            tmp.setChecked(raw.get(2).equals("1"));
+            tmp.setText(org_rank);
+            tmp.setChecked(pref_entity.getBoolean(org_rank, false));
+            final String tmp_rank = org_rank;
             tmp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    db_accesor.updateRaw("organizations", id, new String[]{"enable"}, tmp.isChecked() ? new String[]{"1"} : new String[]{"0"});
+                    pref_editor.putBoolean(tmp_rank, !pref_entity.getBoolean(tmp_rank, false));
+                    pref_editor.commit();
                 }
-
             });
             tmp.setTextColor(Color.BLACK);
             tmp.setVisibility(View.VISIBLE);
             linear_layout.addView(tmp);
             org_list.add(tmp);
         }
+
+        Spinner risk_rank_spinner = (Spinner) view.findViewById(R.id.num_spinner);
+        risk_rank_spinner.setSelection(pref_entity.getInt(Constants.PREF_RANK_NOTIF, 1));
+        risk_rank_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Spinner spinner = (Spinner) parent;
+                String item = (String) spinner.getSelectedItem();
+                pref_editor.putInt(Constants.PREF_RANK_NOTIF, position);
+                pref_editor.commit();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+
         return view;
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(isChecked){
+        if (isChecked) {
             getActivity().startService(new Intent(getActivity(), GpsManager.class));
             Toast.makeText(getActivity(), "GPS start", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             getActivity().stopService(new Intent(getActivity(), GpsManager.class));
             HashMap<String, Double> location = GpsManager.getLocation();
-            Toast.makeText(getActivity(),location.get("latitude") +  "\n" + location.get("longitude"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), location.get("latitude") + "\n" + location.get("longitude"), Toast.LENGTH_SHORT).show();
         }
     }
-
-    private class GetOrgList extends GetHttp {
-        public GetOrgList(){
-            super(Constants.SCHEME, Constants.AUTHORITY, "org/getList", new ArrayList<String>(Arrays.asList("request")));
-        }
-        @Override
-        protected void onPostExecute(String response) {
-            try {
-                HashMap<Integer, String> org_hash  = new HashMap<Integer, String>();
-                JSONObject orgs = new JSONObject(response);
-                Iterator<String> iterator_key = orgs.keys();
-                while(iterator_key.hasNext()) {
-                    String key = iterator_key.next();
-                    org_hash.put(Integer.parseInt(key), orgs.getString(key));
-                }
-                ArrayList<ArrayList<String>> raws = db_accesor.getRaws(0,null,null,null,null);
-            } catch(Exception e) {
-            }
-        }
-
-    }
-
 }

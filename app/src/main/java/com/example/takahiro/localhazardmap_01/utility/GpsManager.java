@@ -6,15 +6,14 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.takahiro.localhazardmap_01.BaseActivity;
 import com.example.takahiro.localhazardmap_01.R;
@@ -50,23 +49,28 @@ public class GpsManager extends Service {
 
     @Override
     public void onCreate() {
-        DBAccesor db_accesor = DBAccesor.getInstance(null);
-        String enabled_org_list = "[";
-        for(ArrayList<String> raw : db_accesor.getRaws(0,null,"enable=1",null,null)) {
-            if(raw.size() == 0) {
-                enabled_org_list += "]";
-                break;
-            }
-            enabled_org_list += raw.get(0)+",";
+
+        SharedPreferences pref_entity = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        String[] list = getApplicationContext().getApplicationContext().getResources().getStringArray(R.array.ORG_RANK);
+        ArrayList<String> org_rank_list = new ArrayList<String>(Arrays.asList(list));
+        String enabled_rank_list = "[";
+        for(int i=0;i < org_rank_list.size();i++ ) {
+            enabled_rank_list += pref_entity.getBoolean(org_rank_list.get(i),false) ? (org_rank_list.size()-i-1) + "," : "";
         }
-        enabled_org_list = enabled_org_list.replaceAll(",$","]");
-        final String tmp = enabled_org_list;
+        enabled_rank_list = enabled_rank_list.replaceAll(",$","]");
+        enabled_rank_list = enabled_rank_list.replaceAll(",$", "]");
+
+        final String tmp_level = pref_entity.getInt(Constants.PREF_RANK_NOTIF,1) + "";
+        final String tmp_rank = enabled_rank_list;
+
         this.location_listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                if(user_location == null) user_location = new HashMap<String,Double>();
                 user_location.put("latitude", location.getLatitude());
                 user_location.put("longitude", location.getLongitude());
-                new PostLocation().execute(String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), tmp);
+                new PostLocation().execute(String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), tmp_rank, tmp_level);
             }
             @Override
             public void onProviderDisabled(String provider) {}
@@ -77,7 +81,6 @@ public class GpsManager extends Service {
         };
         this.location_manager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         this.location_manager.requestLocationUpdates(this.location_manager.GPS_PROVIDER, MINTIME_FOR_NOTIFICATION, MINLENGTH_FOR_NOTIFICATION, this.location_listener);
-        user_location = new HashMap<String,Double>();
         boolean gps_flag = this.location_manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
     @Override
@@ -110,7 +113,7 @@ public class GpsManager extends Service {
     // WrapperClass for accessor
     private class PostLocation extends PostHttp {
         public PostLocation() {
-            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude","orgs")));
+            super(Constants.SCHEME, Constants.AUTHORITY, "location/postLocation", new ArrayList<String>(Arrays.asList("id", "pw", "latitude", "longitude", "rank", "risk_level")));
         }
         @Override
         protected void onPostExecute(String response) {

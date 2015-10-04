@@ -6,11 +6,16 @@ package com.example.takahiro.localhazardmap_01.entity;
 public class Constants {
 
     // URL
-    public static String SCHEME = "http";
-    public static String AUTHORITY = "192.168.43.253";
+    public static final String SCHEME = "http";
+    public static final String AUTHORITY = "192.168.0.8";
 
     // user data
-    public static int ID = 1;
-    public static String PW = "pass";
+    public static final int ID = 1;
+    public static final String PW = "pass";
 
+    // SharedPreferences name of configure.
+    public static final String PREF_RANK_NOTIF = "org_rank_for_notif";
+
+    // for camera
+    public static final int MAX_PIC_SIZE = 1200;
 }

@@ -8,9 +8,42 @@
 
     <Switch
         android:id="@+id/switch_gps_activator"
-        android:text="GPSによる位置情報の送信と通知の受信"
+        android:text="GPSによる位置情報送信と通知"
+        android:textSize="14dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="#ff808080" />
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:text="通知受信危険度"
+            android:textSize="14dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+        />
+        <Spinner
+            android:id="@+id/num_spinner"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:prompt="@string/PROMPT_FOR_SET_RECEIVE_RISK_LEVEL"
+            android:entries="@array/RISK_LEVELS"
+        />
+        <TextView
+            android:text="以上"
+            android:textSize="14dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+        />
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
@@ -23,11 +56,14 @@
         android:layout_height="wrap_content"
         android:text="マップ受信組織"/>
 
-    <LinearLayout
-        android:id="@+id/org_list"
+    <ScrollView
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:orientation="vertical"/>
-
+        android:layout_width="fill_parent" >
+        <LinearLayout
+            android:id="@+id/org_list"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical"/>
+    </ScrollView>
 
 </LinearLayout>

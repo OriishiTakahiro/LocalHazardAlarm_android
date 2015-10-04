@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.takahiro.localhazardmap_01.R;
+import com.example.takahiro.localhazardmap_01.entity.WarningInfo;
 
 import java.util.ArrayList;
 
@@ -19,10 +19,11 @@ public class HMapFrameFragment extends Fragment {
 
     // --- there lists is called by HMapFragment
     static protected ListView disaster_list = null;
-    static protected ArrayList<String> descriptions = null;
+    static protected ArrayList<WarningInfo> war_info_list = null;
     // ---
 
     private int old_position = -1;
+    private Fragment old_frag = null;
     private FragmentTransaction frag_transaction = null;
 
     @Override
@@ -62,17 +63,28 @@ public class HMapFrameFragment extends Fragment {
         swapFragment(true, 0);
     }
 
-    private void swapFragment(boolean newfrag_is_map, int position) {
+    public void backToMap() {
+        swapFragment(false, this.old_position);
+    }
+
+    private void swapFragment(boolean uninitialized, int position) {
         // http://yuyakaido.hatenablog.com/entry/2014/02/16/230947
         this.frag_transaction = getChildFragmentManager().beginTransaction();
-        if (newfrag_is_map || old_position == position) {
+        if (uninitialized) {
             this.frag_transaction.replace(R.id.hmap_frame, new HMapFragment());
+            this.old_frag = null;
             this.old_position = -1;
         } else {
-            this.frag_transaction.replace(R.id.hmap_frame, new DisasterInfoFragment().setInfo(
-                    (String)disaster_list.getItemAtPosition(position), descriptions.get(position)
-            ));
-            this.old_position = position;
+            WarningInfo war_info = war_info_list.get(position);
+            Fragment new_frag = new DisasterInfoFragment().setInfo(war_info, this);
+            if(this.old_frag != null) this.frag_transaction.remove(this.old_frag);
+            if(old_position != position) {
+                this.frag_transaction.add(R.id.hmap_frame, new_frag);
+                this.old_frag = new_frag;
+                this.old_position = position;
+            } else {
+                this.old_position = -1;
+            }
         }
         this.frag_transaction.addToBackStack(null);
         this.frag_transaction.commit();

@@ -3,21 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context="com.example.takahiro.localhazardmap_01.fragments.HMapFrameFragment">
 
-    <ListView
-        android:id="@+id/hmap_frame_disas_list"
-        android:layout_width="110dp"
-        android:layout_height="fill_parent"
-        android:background="#111111"
-        android:divider="#ffffff"
-        android:dividerHeight="1sp"
-        />
     <FrameLayout
         android:id="@+id/hmap_frame"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.7"
         />
+
+        <ListView
+            android:id="@+id/hmap_frame_disas_list"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:background="#111111"
+            android:divider="#ffffff"
+            android:dividerHeight="0.4dp"
+            >
+        </ListView>
 
 </LinearLayout>

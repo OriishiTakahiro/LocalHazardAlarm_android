@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array name="ITEM_LIST">
-        <item>ハザードマップ</item>
+        <item>地図</item>
         <item>報告</item>
         <item>設定</item>
     </string-array>
+
+    <string-array name="RISK_LEVELS">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="ORG_RANK">
+        <item>気象庁</item>
+        <item>県</item>
+        <item>市町村</item>
+        <item>自治体</item>
+        <item>ユーザ</item>
+        <item>その他</item>
+    </string-array>
+
 </resources>
