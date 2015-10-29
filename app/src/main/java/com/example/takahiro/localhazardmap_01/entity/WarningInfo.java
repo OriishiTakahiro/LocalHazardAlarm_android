@@ -14,13 +14,15 @@ public class WarningInfo {
     public String description;
     public String organization;
     public int risk_level;
+    public String posted_date;
     public byte[] img;
 
-    public WarningInfo(String title, String description, String organization, int risk_level, String string_img) {
+    public WarningInfo(String title, String description, String organization, int risk_level, String string_img, String posted_date) {
         this.title = title;
         this.description = description;
         this.organization = organization;
         this.risk_level = risk_level;
+        this.posted_date = posted_date;
         if(string_img != null) this.img = string_img.getBytes(Charset.forName("ISO-8859-1"));
     }
 

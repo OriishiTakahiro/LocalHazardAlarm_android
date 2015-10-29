@@ -52,8 +52,11 @@ public class HMapFragment extends MapFragment {
                 @Override
                 public void onMyLocationChange(Location curr_location) {
                     if (uninitialized) {
-                        LatLng curr_latlng = new LatLng(curr_location.getLatitude(), curr_location.getLongitude());
+                        // LatLng curr_latlng = new LatLng(curr_location.getLatitude(), curr_location.getLongitude());
+                        LatLng curr_latlng = new LatLng(36.642916,138.189261);
                         g_map.moveCamera(CameraUpdateFactory.newLatLngZoom(curr_latlng, 15));
+                        LatLng center = g_map.getCameraPosition().target;
+                        new PostLocation().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(center.latitude), String.valueOf(center.longitude), enabled_rank_list, "1"});
                         uninitialized = false;
                     }
                 }
@@ -137,7 +140,8 @@ public class HMapFragment extends MapFragment {
                             warning.getString("description"),
                             warning.getString("org"),
                             warning.getInt("risk_level"),
-                            warning.has("img") ? warning.getString("img") : null
+                            warning.has("img") ? warning.getString("img") : null,
+                            warning.getString("posted_date")
                         );
                     HMapFrameFragment.war_info_list.add(tmp_warning);
                 }

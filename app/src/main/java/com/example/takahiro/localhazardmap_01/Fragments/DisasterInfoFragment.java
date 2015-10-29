@@ -44,6 +44,8 @@ public class DisasterInfoFragment extends Fragment {
         TextView organization_view = (TextView) view.findViewById(R.id.disas_info_org);
         organization_view.setText("発令元 : " + this.warning_info.organization);
 
+        TextView posted_date = (TextView) view.findViewById(R.id.posted_date);
+        posted_date.setText("投稿日時 : " + this.warning_info.posted_date);
 
         TextView risk_level_view = (TextView) view.findViewById(R.id.disas_info_risklevel);
         risk_level_view.setText("危険度 : " + this.warning_info.risk_level);

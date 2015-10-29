@@ -7,13 +7,14 @@ public class Constants {
 
     // URL
     public static final String SCHEME = "http";
-    public static final String AUTHORITY = "192.168.0.8";
+    public static final String AUTHORITY = "192.168.111.100";
 
     // user data
     public static final int ID = 1;
     public static final String PW = "pass";
 
     // SharedPreferences name of configure.
+    public static final String NOTIF_ENABLED = "notifing_is_enabled";
     public static final String PREF_RANK_NOTIF = "org_rank_for_notif";
 
     // for camera

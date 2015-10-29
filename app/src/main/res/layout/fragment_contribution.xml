@@ -29,8 +29,8 @@
     <EditText
         android:id="@+id/description_editer"
         android:hint="description"
-        android:maxLines="3"
-        android:minLines="3"
+        android:maxLines="4"
+        android:minLines="4"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         />

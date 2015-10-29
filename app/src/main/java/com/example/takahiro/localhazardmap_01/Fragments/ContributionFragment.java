@@ -1,14 +1,14 @@
 package com.example.takahiro.localhazardmap_01.fragments;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.util.Log;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,15 +23,16 @@ import com.example.takahiro.localhazardmap_01.entity.Constants;
 import com.example.takahiro.localhazardmap_01.utility.GpsManager;
 import com.example.takahiro.localhazardmap_01.utility.PostHttp;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class ContributionFragment extends Fragment {
+
+    private SharedPreferences pref_entity;
 
     private Camera camera;
     private SurfaceView photo_view;
@@ -39,7 +40,6 @@ public class ContributionFragment extends Fragment {
 
     private boolean photo_is_taken = false;
     private byte[] photo;
-    private Bitmap bitmap;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,8 @@ public class ContributionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_contribution, container, false);
 
+        this.pref_entity = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         final EditText title_editer = (EditText)view.findViewById(R.id.title_editer);
         final EditText description_editer = (EditText)view.findViewById(R.id.description_editer);
 
@@ -59,11 +61,57 @@ public class ContributionFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 HashMap<String, Double> user_location = GpsManager.getLocation();
+                String photo_data = photo != null ? new String(photo, Charset.forName("ISO-8859-1")) : "";
                 if(user_location != null ) {
-                    String photo_data = photo != null ? new String(photo, Charset.forName("ISO-8859-1")) : "";
                     new PostContribution().execute(new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), title_editer.getText().toString(), description_editer.getText().toString(), photo_data});
                 } else {
-                    Toast.makeText(getActivity(), "投稿機能を利用するにはGPS設定をONにしてください\n(既にONならばGPSが位置を検出するまでお待ちください)", Toast.LENGTH_LONG).show();
+                    double lat = (double) pref_entity.getFloat("latitude", 35.67966f);
+                    double lon = (double) pref_entity.getFloat("longitude", 139.7681f);
+                    String text = convertCooridnateToAddress(lat, lon);
+                    if(text != null) {
+                        showDialog(text, lat, lon, new String[]{String.valueOf(Constants.ID), Constants.PW, String.valueOf(lat), String.valueOf(lon), title_editer.getText().toString(), description_editer.getText().toString(), photo_data});
+                    } else {
+                        Toast.makeText(getActivity(), "投稿機能を利用するにはGPS設定をONにしてください\n(ONの場合GPSが位置を検出するまでお待ちください)", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            private void showDialog(String address, final double lat, final double lon, final String[] params) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("GPSでの位置情報取得が完了していません");
+                builder.setMessage("前回取得した位置\n" + address + "に投稿しますか？");
+                builder.setPositiveButton("送信", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new PostContribution().execute(params);
+                    }
+                });
+                builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                builder.show();
+            }
+
+            private String convertCooridnateToAddress(double lat, double lon) {
+                Geocoder g_coder = new Geocoder(getActivity(), Locale.JAPAN);
+                try {
+                    List<Address> address_list = g_coder.getFromLocation(lat, lon, 1);
+                    if(!address_list.isEmpty()) {
+                        Address candidate_address = address_list.get(0);
+                        StringBuffer address_buf = new StringBuffer();
+                        String tmp;
+                        for(int i=0;(tmp = candidate_address.getAddressLine(i)) != null;i++) {
+                            address_buf.append(tmp + "\n");
+                        }
+                        tmp = address_buf.toString();
+                        return tmp;
+                    } else {
+                        return null;
+                    }
+                } catch(Exception e) {
+                    return null;
                 }
             }
 

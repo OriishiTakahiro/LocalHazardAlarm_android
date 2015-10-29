@@ -32,7 +32,12 @@ import java.util.HashMap;
  */
 public class GpsManager extends Service {
 
-    private final int MINTIME_FOR_NOTIFICATION = 6000;
+    private SharedPreferences.Editor pref_editor;
+    private SharedPreferences pref_entity;
+
+    // minimum time interval between location updates, in milliseconds
+    private final int MINTIME_FOR_NOTIFICATION = 180000;
+    // minimum distance between location updates, in meters
     private final int MINLENGTH_FOR_NOTIFICATION = 10;
 
     private LocationManager location_manager;
@@ -43,14 +48,13 @@ public class GpsManager extends Service {
     private NotificationManager notif_manager = null;
 
 
-    public static HashMap<String, Double> getLocation() {
-        return user_location;
-    }
+    public static HashMap<String, Double> getLocation() { return user_location; }
 
     @Override
     public void onCreate() {
 
-        SharedPreferences pref_entity = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        this.pref_entity = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        this.pref_editor = this.pref_entity.edit();
 
         String[] list = getApplicationContext().getApplicationContext().getResources().getStringArray(R.array.ORG_RANK);
         ArrayList<String> org_rank_list = new ArrayList<String>(Arrays.asList(list));
@@ -70,6 +74,9 @@ public class GpsManager extends Service {
                 if(user_location == null) user_location = new HashMap<String,Double>();
                 user_location.put("latitude", location.getLatitude());
                 user_location.put("longitude", location.getLongitude());
+                pref_editor.putFloat("latitude", (float)location.getLatitude());
+                pref_editor.putFloat("longitude", (float)location.getLongitude());
+                pref_editor.commit();
                 new PostLocation().execute(String.valueOf(Constants.ID), Constants.PW, String.valueOf(user_location.get("latitude")), String.valueOf(user_location.get("longitude")), tmp_rank, tmp_level);
             }
             @Override

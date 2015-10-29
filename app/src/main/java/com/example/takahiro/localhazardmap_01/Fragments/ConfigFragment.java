@@ -60,6 +60,7 @@ public class ConfigFragment extends Fragment implements CompoundButton.OnChecked
         //Set ToggleSwitch that setting to activate gps.
         this.gps_activator = (Switch) view.findViewById(R.id.switch_gps_activator);
         this.gps_activator.setOnCheckedChangeListener(this);
+        this.gps_activator.setChecked(pref_entity.getBoolean(Constants.NOTIF_ENABLED, false));
         this.gps_activator.setSwitchTypeface(Typeface.DEFAULT_BOLD, Typeface.ITALIC);
 
         // Generate checkbox list.
@@ -101,19 +102,20 @@ public class ConfigFragment extends Fragment implements CompoundButton.OnChecked
             public void onNothingSelected(AdapterView<?> arg0) {
             }
         });
-
         return view;
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        pref_editor.putBoolean(Constants.NOTIF_ENABLED, isChecked);
+        pref_editor.commit();
         if (isChecked) {
             getActivity().startService(new Intent(getActivity(), GpsManager.class));
             Toast.makeText(getActivity(), "GPS start", Toast.LENGTH_SHORT).show();
         } else {
             getActivity().stopService(new Intent(getActivity(), GpsManager.class));
             HashMap<String, Double> location = GpsManager.getLocation();
-            Toast.makeText(getActivity(), location.get("latitude") + "\n" + location.get("longitude"), Toast.LENGTH_SHORT).show();
+            if(location != null) Toast.makeText(getActivity(), location.get("latitude") + "\n" + location.get("longitude"), Toast.LENGTH_SHORT).show();
         }
     }
 }
